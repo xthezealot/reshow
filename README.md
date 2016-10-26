@@ -7,7 +7,7 @@ For example, if you are in the `The Blacklist` directory, it renames the `thebla
 
 ## Install
 
-```Go
+```Shell
 go get -u github.com/arthurwhite/reshow
 ```
 
