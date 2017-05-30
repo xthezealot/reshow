@@ -15,6 +15,7 @@ Usage
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -23,46 +24,66 @@ import (
 )
 
 var (
-	// S01E01 match
-	seRe = regexp.MustCompile(`(?i)S\d\dE\d\d`)
-	// Final match
-	finRe = regexp.MustCompile(`(?i)FINAL`)
-	// Language match
-	langsRe = map[*regexp.Regexp]string{
-		regexp.MustCompile(`(?i)[^A-Z]EN[^A-Z]|ENGLISH`): "EN",
-		regexp.MustCompile(`(?i)[^A-Z]FR[^A-Z]|FRENCH`):  "FR",
+	dirName string
+	seRe    = regexp.MustCompile(`(?i)S\d\dE\d\d`) // S01E01 match
+	finalRe = regexp.MustCompile(`(?i)FINAL`)
+	langsRe = make(map[*regexp.Regexp]string)
+	langs   = map[string]string{
+		"EN": "ENGLISH",
+		"DE": "GERMAN",
+		"FR": "FRENCH",
+		"NL": "DUTCH",
+		"RO": "ROMANIAN",
+		"JP": "JAPANESE",
+		"RU": "RUSSIAN",
 	}
 )
 
+func init() {
+	for code, l := range langs {
+		langsRe[regexp.MustCompile("((?i)[^A-Z]"+code+"[^A-Z])|([^A-Z]"+l+"[^A-Z])")] = code
+	}
+}
+
 func main() {
-	files, err := ioutil.ReadDir("./")
+	var err error
+	dirName, err = os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	dirName = filepath.Base(dirName)
+
+	files, err := ioutil.ReadDir(".")
 	if err != nil {
 		panic(err)
 	}
 
 	for _, f := range files {
-		fileName := f.Name()
-		if !seRe.MatchString(fileName) {
+		n, err := cleanName(f.Name())
+		if err != nil {
+			fmt.Println(err)
 			continue
 		}
-		newName := currentDirName()
-		newName += " " + strings.ToUpper(seRe.FindString(fileName))
-		if finRe.MatchString(fileName) {
-			newName += " " + "FINAL"
-		}
-		for re, lng := range langsRe {
-			if re.MatchString(fileName) {
-				newName += " " + lng
-			}
-		}
-		newName += filepath.Ext(fileName)
-		if err = os.Rename(fileName, newName); err != nil {
+		if err = os.Rename(f.Name(), n); err != nil {
 			panic(err)
 		}
 	}
 }
 
-func currentDirName() string {
-	dir, _ := os.Getwd()
-	return filepath.Base(dir)
+func cleanName(file string) (n string, err error) {
+	if !seRe.MatchString(file) {
+		err = fmt.Errorf("%s is not a TV show name", file)
+		return
+	}
+	n = dirName + " " + strings.ToUpper(seRe.FindString(file))
+	if finalRe.MatchString(file) {
+		n += " " + "FINAL"
+	}
+	for re, lng := range langsRe {
+		if re.MatchString(file) {
+			n += " " + lng
+		}
+	}
+	n += filepath.Ext(file)
+	return
 }
