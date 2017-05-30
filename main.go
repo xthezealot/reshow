@@ -16,6 +16,8 @@ package main
 
 import (
 	"fmt"
+	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -28,20 +30,63 @@ var (
 	seRe    = regexp.MustCompile(`(?i)S\d\dE\d\d`) // S01E01 match
 	finalRe = regexp.MustCompile(`(?i)FINAL`)
 	langsRe = make(map[*regexp.Regexp]string)
-	langs   = map[string]string{
-		"EN": "ENGLISH",
-		"DE": "GERMAN",
-		"FR": "FRENCH",
-		"NL": "DUTCH",
-		"RO": "ROMANIAN",
-		"JP": "JAPANESE",
-		"RU": "RUSSIAN",
+	langs   = []language.Tag{
+		language.Albanian,
+		language.Armenian,
+		language.Bulgarian,
+		language.Catalan,
+		language.Chinese,
+		language.Croatian,
+		language.Czech,
+		language.Danish,
+		language.Dutch,
+		language.English,
+		language.Estonian,
+		language.Filipino,
+		language.Finnish,
+		language.French,
+		language.Georgian,
+		language.Greek,
+		language.Hebrew,
+		language.Hindi,
+		language.Hungarian,
+		language.Icelandic,
+		language.Indonesian,
+		language.Italian,
+		language.Japanese,
+		language.Kazakh,
+		language.Korean,
+		language.Latvian,
+		language.Lithuanian,
+		language.Macedonian,
+		language.Malay,
+		language.Mongolian,
+		language.Nepali,
+		language.Norwegian,
+		language.Persian,
+		language.Polish,
+		language.Portuguese,
+		language.Romanian,
+		language.Russian,
+		language.Serbian,
+		language.Slovak,
+		language.Slovenian,
+		language.Spanish,
+		language.Swahili,
+		language.Swedish,
+		language.Thai,
+		language.Turkish,
+		language.Ukrainian,
+		language.Uzbek,
+		language.Vietnamese,
 	}
 )
 
 func init() {
-	for code, l := range langs {
-		langsRe[regexp.MustCompile("((?i)[^A-Z]"+code+"[^A-Z])|([^A-Z]"+l+"[^A-Z])")] = code
+	langNamerEN := display.Languages(language.English)
+	for _, l := range langs {
+		re := regexp.MustCompile("((?i)[^A-Z]" + l.String() + "[^A-Z])|([^A-Z]" + strings.ToUpper(langNamerEN.Name(l)) + "[^A-Z])|([^A-Z]" + strings.ToUpper(display.Self.Name(l)) + "[^A-Z])")
+		langsRe[re] = strings.ToUpper(l.String())
 	}
 }
 

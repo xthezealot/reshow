@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestCleanName(t *testing.T) {
 	dirName = "The Blacklist"
@@ -22,5 +25,11 @@ func TestCleanName(t *testing.T) {
 				t.Errorf("got %q, want %q", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestRules(t *testing.T) {
+	for re, code := range langsRe {
+		fmt.Println(re, code)
 	}
 }
