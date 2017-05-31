@@ -29,6 +29,7 @@ var (
 	dirName string
 	seRe    = regexp.MustCompile(`(?i)S\d\dE\d\d`) // S01E01 match
 	finalRe = regexp.MustCompile(`(?i)FINAL`)
+
 	langsRe = make(map[*regexp.Regexp]string)
 	langs   = []language.Tag{
 		language.Albanian,
@@ -80,6 +81,11 @@ var (
 		language.Uzbek,
 		language.Vietnamese,
 	}
+
+	ignore = map[string]struct{}{
+		".DS_Store": {},
+		"Thumbs.db": {},
+	}
 )
 
 func init() {
@@ -104,6 +110,9 @@ func main() {
 	}
 
 	for _, f := range files {
+		if _, ok := ignore[f.Name()]; ok {
+			continue
+		}
 		n, err := cleanName(f.Name())
 		if err != nil {
 			fmt.Println(err)
